@@ -1,72 +1,56 @@
-const showInputError = (formElement, inputElement, errorMessage, settings) => {
-  const errorElementId = `#${inputElement.id}-error`;
-  const errorElement = formElement.querySelector(errorElementId);
-  inputElement.classList.add(settings.inputErrorClass);
-  errorElement.textContent = errorMessage;
-  errorElement.classList.add(settings.errorClass);
+import { initialTodos, validationConfig } from "../utils/constants.js";
+import Todo from "../components/Todo.js";
+import FormValidator from "../components/FormValidator.js";
+
+const addTodoButton = document.querySelector(".button_action_add");
+const addTodoPopup = document.querySelector("#add-todo-popup");
+const addTodoForm = document.forms["add-todo-form"]; // Using form ID access
+const addTodoCloseBtn = addTodoPopup.querySelector(".popup__close");
+const todosList = document.querySelector(".todos__list");
+
+const openModal = (modal) => {
+  modal.classList.add("popup_visible");
 };
 
-const hideInputError = (formElement, inputElement, settings) => {
-  const errorElementId = `#${inputElement.id}-error`;
-  const errorElement = formElement.querySelector(errorElementId);
-  inputElement.classList.remove(settings.inputErrorClass);
-  errorElement.classList.remove(settings.errorClass);
-  errorElement.textContent = "";
+const closeModal = (modal) => {
+  modal.classList.remove("popup_visible");
 };
 
-const checkInputValidity = (formElement, inputElement, settings) => {
-  if (!inputElement.validity.valid) {
-    showInputError(
-      formElement,
-      inputElement,
-      inputElement.validationMessage,
-      settings,
-    );
-  } else {
-    hideInputError(formElement, inputElement, settings);
-  }
+const generateTodo = (data) => {
+  const todo = new Todo(data, "#todo-template");
+  return todo.getView();
 };
 
-const hasInvalidInput = (inputList) => {
-  return inputList.some((inputElement) => {
-    return !inputElement.validity.valid;
-  });
+const renderTodo = (item) => {
+  const todoElement = generateTodo(item);
+  todosList.append(todoElement);
 };
 
-const toggleButtonState = (inputList, buttonElement, settings) => {
-  if (hasInvalidInput(inputList)) {
-    buttonElement.classList.add(settings.inactiveButtonClass);
-    buttonElement.disabled = true;
-  } else {
-    buttonElement.classList.remove(settings.inactiveButtonClass);
-    buttonElement.disabled = false;
-  }
-};
+addTodoButton.addEventListener("click", () => {
+  openModal(addTodoPopup);
+});
 
-const setEventListeners = (formElement, settings) => {
-  const inputList = Array.from(
-    formElement.querySelectorAll(settings.inputSelector),
-  );
-  const buttonElement = formElement.querySelector(
-    settings.submitButtonSelector,
-  );
+addTodoCloseBtn.addEventListener("click", () => {
+  closeModal(addTodoPopup);
+});
 
-  toggleButtonState(inputList, buttonElement, settings);
+addTodoForm.addEventListener("submit", (evt) => {
+  evt.preventDefault();
+  const name = evt.target.name.value;
+  const dateInput = evt.target.date.value;
 
-  inputList.forEach((inputElement) => {
-    inputElement.addEventListener("input", () => {
-      checkInputValidity(formElement, inputElement, settings);
-      toggleButtonState(inputList, buttonElement, settings);
-    });
-  });
-};
+  const date = new Date(dateInput);
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
 
-const enableValidation = (settings) => {
-  const formElement = document.querySelector(settings.formSelector);
-  formElement.addEventListener("submit", (evt) => {
-    evt.preventDefault();
-  });
-  setEventListeners(formElement, settings);
-};
+  const id = uuidv4();
+  const values = { name, date, id };
 
-enableValidation(validationConfig);
+  renderTodo(values);
+  addTodoForm.reset();
+  closeModal(addTodoPopup);
+});
+
+initialTodos.forEach(renderTodo);
+
+const newTodoValidator = new FormValidator(validationConfig, addTodoForm);
+newTodoValidator.enableValidation();
