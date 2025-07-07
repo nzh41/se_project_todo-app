@@ -11,12 +11,14 @@ const addTodoButton = document.querySelector(".button_action_add");
 const addTodoPopupEl = document.querySelector("#add-todo-popup");
 const addTodoForm = document.forms["add-todo-form"];
 
+const renderTodo = (item) => {
+  const todoElement = generateTodo(item);
+  todoSection.addItem(todoElement);
+};
+
 const todoSection = new Section({
   items: initialTodos,
-  renderer: (item) => {
-    const todoElement = generateTodo(item);
-    todoSection.addItem(todoElement);
-  },
+  renderer: renderTodo,
   containerSelector: ".todos__list",
 });
 
@@ -36,7 +38,8 @@ const addTodoPopup = new PopupWithForm({
     const id = uuidv4();
     const todoData = { name, date, id };
 
-    renderTodo(todoData);
+    const todoElement = renderTodo(todoData); // ✅ Use renderTodo to generate element
+    todoSection.addItem(todoElement);
     todoCounter.updateTotal(true);
 
     newTodoValidator.resetValidation();
@@ -60,11 +63,6 @@ const generateTodo = (data) => {
   const todo = new Todo(data, "#todo-template", handleCheck, handleDelete);
   const todoElement = todo.getView();
   return todoElement;
-};
-
-const renderTodo = (item) => {
-  const todoElement = generateTodo(item);
-  todoSection.addItem(todoElement);
 };
 
 addTodoButton.addEventListener("click", () => {

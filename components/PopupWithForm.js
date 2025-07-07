@@ -22,11 +22,8 @@ class PopupWithForm extends Popup {
       evt.preventDefault();
       const inputValues = this._getInputValues();
       this._handleFormSubmit(inputValues);
+      this._popupForm.reset();
     });
-  }
-  close() {
-    super.close();
-    this._popupForm.reset();
   }
 }
 

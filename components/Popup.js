@@ -17,14 +17,10 @@ class Popup {
 
   close() {
     this._popupElement.classList.remove("popup_visible");
-    document.removeEventListener("keyup", this.handleEscapeClose);
+    document.removeEventListener("keyup", this._handleEscapeClose);
   }
 
   setEventListeners() {
-    this._popupCloseBtn.addEventListener("click", () => {
-      this.close();
-    });
-
     this._popupElement.addEventListener("mousedown", (evt) => {
       if (
         evt.target.classList.contains("popup__close") ||
